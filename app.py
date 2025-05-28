@@ -43,15 +43,18 @@ if uploaded_file is not None:
     predicted_accent = knn.predict([mfccs_input])[0]
     st.success(f"🎤 Predicted Accent: **{predicted_accent}**")
 
-    # Optional OpenAI explanation
+    # Optional OpenAI explanation with ChatCompletion (new API)
     if openai.api_key:
         try:
-            response = openai.Completion.create(
-                engine="text-davinci-003",
-                prompt=f"Explain how accent detection works for a {predicted_accent} accent.",
-                max_tokens=100
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",  # You can use "gpt-4" if you have access
+                messages=[
+                    {"role": "system", "content": "You are an AI assistant that explains technical concepts in simple terms."},
+                    {"role": "user", "content": f"Explain how accent detection works for a {predicted_accent} accent."}
+                ],
+                max_tokens=150
             )
-            explanation = response.choices[0].text.strip()
+            explanation = response['choices'][0]['message']['content'].strip()
             st.write(f"🧠 **Accent Detection Explanation:**\n{explanation}")
         except Exception as e:
             st.warning(f"OpenAI explanation unavailable: {e}")
