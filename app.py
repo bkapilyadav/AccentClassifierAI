@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 import openai
 
-# Load OpenAI API key from Streamlit secrets or environment variable
+# Load OpenAI API key from secrets or environment variable
 try:
     openai.api_key = st.secrets["openai"]["openai_api_key"]
 except KeyError:
@@ -13,35 +13,37 @@ except KeyError:
 
 st.title("🎙️ Accent Classifier AI Agent")
 
-# File upload widget
 uploaded_file = st.file_uploader("Upload an audio file (.wav or .mp3)", type=["wav", "mp3"])
 
 if uploaded_file is not None:
-    # Save uploaded audio file
     temp_filename = "temp_audio.wav"
     with open(temp_filename, "wb") as f:
         f.write(uploaded_file.read())
-
     st.info("✅ Audio file uploaded successfully.")
 
-    # Extract features from the audio
+    # Extract features from the uploaded audio
     try:
         y, sr = librosa.load(temp_filename, sr=16000)
-        mfccs = np.mean(librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13).T, axis=0)
+        mfccs_input = np.mean(librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13).T, axis=0)
         st.info("🎵 Audio features extracted.")
     except Exception as e:
         st.error(f"❌ Error processing audio: {e}")
         st.stop()
 
-    # Placeholder KNN model (replace with a real trained model)
-    knn = KNeighborsClassifier(n_neighbors=3)
-    # Dummy fitting with one sample (replace with real data during training)
-    knn.fit([mfccs], ["American"])
-    predicted_accent = knn.predict([mfccs])[0]
+    # 🔥 Dummy training data (replace with a real model in production)
+    dummy_features = [
+        np.random.rand(13),  # Random MFCC-like vector
+        np.random.rand(13),
+        np.random.rand(13)
+    ]
+    dummy_labels = ["American", "British", "Indian"]
+    knn = KNeighborsClassifier(n_neighbors=1)
+    knn.fit(dummy_features, dummy_labels)
 
+    predicted_accent = knn.predict([mfccs_input])[0]
     st.success(f"🎤 Predicted Accent: **{predicted_accent}**")
 
-    # Optional: Use OpenAI for an explanation
+    # Optional OpenAI explanation
     if openai.api_key:
         try:
             response = openai.Completion.create(
